@@ -6,32 +6,32 @@
 <title>Social Media Sewa Form - Assam</title>
 </head>
 
-<body style="font-family:Arial;padding:15px">
+<body style="font-family:Arial;padding:15px;text-align:center;">
 
 <h2>Social Media Sewa Form</h2>
 
 <label>नाम / Name</label><br>
-<input id="name" style="width:100%;padding:8px"><br><br>
+<input id="name" style="width:90%;padding:8px;margin:auto;display:block;"><br><br>
 
 <label>District Name</label><br>
-<select id="district" onchange="loadTehsil()" style="width:100%;padding:8px">
+<select id="district" onchange="loadTehsil()" style="width:90%;padding:8px;margin:auto;display:block;">
   <option value="">Select District</option>
 </select><br><br>
 
 <label>Tehsil Name</label><br>
-<select id="tehsil" onchange="loadSewadar()" style="width:100%;padding:8px">
+<select id="tehsil" onchange="loadSewadar()" style="width:90%;padding:8px;margin:auto;display:block;">
   <option value="">Select Tehsil</option>
 </select><br><br>
 
 <label>Sewadar Name</label><br>
-<select id="sewadar" style="width:100%;padding:8px">
+<select id="sewadar" style="width:90%;padding:8px;margin:auto;display:block;">
   <option value="">Select Sewadar</option>
 </select><br><br>
 
 <label>Sewa Count</label><br>
-<input id="sewa" type="number" style="width:100%;padding:8px"><br><br>
+<input id="sewa" type="number" style="width:90%;padding:8px;margin:auto;display:block;"><br><br>
 
-<button onclick="submitToSheet()" style="padding:10px 20px;font-size:16px">
+<button onclick="submitToSheet()" style="padding:10px 20px;font-size:16px;display:block;margin:auto;">
 Submit
 </button>
 
@@ -94,7 +94,7 @@ function submitToSheet(){
   // 🔹 Your deployed Apps Script Web App URL
   fetch("https://script.google.com/macros/s/AKfycbxFEo-3G1Rug0WW5zXbmOjMhXFfRskrAiuYOJ2cluLiZ0HXF3WkilL1uicOhg6U49Wq/exec", {
     method: "POST",
-    mode: "no-cors", // SPCK/mobile friendly
+    mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
