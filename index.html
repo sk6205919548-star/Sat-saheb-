@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Registration Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{font-family:Arial; padding:20px; background:#f9f9f9;}
+    input, select, button {
+      width:100%; padding:10px; margin:5px 0; font-size:16px;
+    }
+    button{background:#4CAF50; color:white; border:none; cursor:pointer;}
+    button:hover{background:#45a049;}
+  </style>
+</head>
+<body>
+
+<h2>Registration Form</h2>
+
+<input type="text" id="name" placeholder="Enter Name">
+
+<select id="state">
+  <option value="">Select State</option>
+</select>
+
+<select id="district">
+  <option value="">Select District</option>
+</select>
+
+<button id="submitBtn">Submit</button>
+
+<script>
+const stateSelect = document.getElementById('state');
+const districtSelect = document.getElementById('district');
+
+// Your SheetDB API
+const API_URL = "https://sheetdb.io/api/v1/ca2r9kmxmg703";
+
+// Load master sheet for dropdowns
+fetch(API_URL + "?sheet=master")
+  .then(res => res.json())
+  .then(data => {
+    const map = {};
+
+    data.forEach(row => {
+      const s = row.state;
+      const d = row.district;
+      if (s && d) {
+        if(!map[s]) map[s] = [];
+        if(!map[s].includes(d)) map[s].push(d);
+      }
+    });
+
+    // Populate states
+    Object.keys(map).forEach(s => {
+      let opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      stateSelect.appendChild(opt);
+    });
+
+    // When state changes → districts
+    stateSelect.onchange = () => {
+      districtSelect.innerHTML = "<option value=''>Select District</option>";
+      (map[stateSelect.value] || []).forEach(d =>{
+        let opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        districtSelect.appendChild(opt);
+      });
+    };
+
+  })
+  .catch(err => {
+    alert("Error loading dropdown data");
+    console.error(err);
+  });
+
+// Submit handler
+document.getElementById("submitBtn").addEventListener("click", ()=>{
+  const name = document.getElementById("name").value.trim();
+  const state = stateSelect.value;
+  const district = districtSelect.value;
+
+  if(!name || !state || !district){
+    alert("Please fill all fields");
+    return;
+  }
+
+  const postData = {
+    data:[{
+      Name: name,
+      state: state,
+      district: district
+    }]
+  };
+
+  fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(postData)
+  })
+  .then(res => res.json())
+  .then(resp => {
+    alert("Data Saved Successfully!");
+    document.getElementById("name").value = "";
+    stateSelect.value = "";
+    districtSelect.innerHTML = "<option value=''>Select District</option>";
+  })
+  .catch(err => {
+    alert("Error submitting data");
+    console.error(err);
+  });
+
+});
+</script>
+
+</body>
+</html>
