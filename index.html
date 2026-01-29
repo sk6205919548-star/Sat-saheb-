@@ -1,117 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Registration Form</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body{font-family:Arial; padding:20px; background:#f9f9f9;}
-    input, select, button {
-      width:100%; padding:10px; margin:5px 0; font-size:16px;
-    }
-    button{background:#4CAF50; color:white; border:none; cursor:pointer;}
-    button:hover{background:#45a049;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social Media Sewa Form - Assam</title>
 </head>
-<body>
 
-<h2>Registration Form</h2>
+<body style="font-family:Arial;padding:15px">
 
-<input type="text" id="name" placeholder="Enter Name">
+<h2>Social Media Sewa Form</h2>
 
-<select id="state">
-  <option value="">Select State</option>
-</select>
+<label>नाम / Name</label><br>
+<input id="name" style="width:100%;padding:8px"><br><br>
 
-<select id="district">
+<label>District</label><br>
+<select id="district" onchange="loadTehsil()" style="width:100%;padding:8px">
   <option value="">Select District</option>
-</select>
+</select><br><br>
 
-<button id="submitBtn">Submit</button>
+<label>Tehsil</label><br>
+<select id="tehsil" onchange="loadSewadar()" style="width:100%;padding:8px">
+  <option value="">Select Tehsil</option>
+</select><br><br>
+
+<label>Sewadar</label><br>
+<select id="sewadar" style="width:100%;padding:8px">
+  <option value="">Select Sewadar</option>
+</select><br><br>
+
+<label>Sewa Count</label><br>
+<input id="sewa" type="number" style="width:100%;padding:8px"><br><br>
+
+<button onclick="submitToSheet()" style="padding:10px 20px;font-size:16px">
+Submit
+</button>
+
+<p id="msg"></p>
 
 <script>
-const stateSelect = document.getElementById('state');
-const districtSelect = document.getElementById('district');
+// 🔹 Static Data - District → Tehsil → Sewadar
+const DATA = {
+  "Kamrup": { "Guwahati": ["Suman Das","Ramesh Das","Anil Roy"], "Rangia": ["Bimal Das","Hitesh Roy"] },
+  "Nagaon": { "Nagaon Sadar": ["Raju Bora","Manoj Kalita"], "Hojai": ["Dipak Ahmed","Salim Hussain"] },
+  "Barpeta": { "Howly": ["Anup Das","Bharat Sharma"], "Pathsala": ["Rina Das","Sunil Borah"] },
+  "Dibrugarh": { "Dibrugarh Town": ["Rakesh Gogoi","Nilesh Deka"], "Tingkhong": ["Sita Bora","Ritu Talukdar"] },
+  "Jorhat": { "Jorhat Sadar": ["Ranjit Phukan","Manash Gogoi"], "Titabor": ["Bikash Sarma","Anil Phukan"] },
+  "Sivasagar": { "Sivasagar Sadar": ["Rinku Saikia","Deepak Rajkhowa"], "Amguri": ["Rohit Hazarika","Jitu Saikia"] }
+};
 
-// Your SheetDB API
-const API_URL = "https://sheetdb.io/api/v1/ca2r9kmxmg703";
+// 🔹 Populate District
+const districtSelect = document.getElementById("district");
+for(let d in DATA){ districtSelect.innerHTML += `<option value="${d}">${d}</option>`; }
 
-// Load master sheet for dropdowns
-fetch(API_URL + "?sheet=master")
-  .then(res => res.json())
-  .then(data => {
-    const map = {};
+// 🔹 Load Tehsil
+function loadTehsil(){
+  const tehsilSelect = document.getElementById("tehsil");
+  const sewadarSelect = document.getElementById("sewadar");
+  tehsilSelect.innerHTML = "<option value=''>Select Tehsil</option>";
+  sewadarSelect.innerHTML = "<option value=''>Select Sewadar</option>";
+  if(!DATA[district.value]) return;
+  for(let t in DATA[district.value]){
+    tehsilSelect.innerHTML += `<option value="${t}">${t}</option>`;
+  }
+}
 
-    data.forEach(row => {
-      const s = row.state;
-      const d = row.district;
-      if (s && d) {
-        if(!map[s]) map[s] = [];
-        if(!map[s].includes(d)) map[s].push(d);
-      }
-    });
-
-    // Populate states
-    Object.keys(map).forEach(s => {
-      let opt = document.createElement("option");
-      opt.value = s;
-      opt.textContent = s;
-      stateSelect.appendChild(opt);
-    });
-
-    // When state changes → districts
-    stateSelect.onchange = () => {
-      districtSelect.innerHTML = "<option value=''>Select District</option>";
-      (map[stateSelect.value] || []).forEach(d =>{
-        let opt = document.createElement("option");
-        opt.value = d;
-        opt.textContent = d;
-        districtSelect.appendChild(opt);
-      });
-    };
-
-  })
-  .catch(err => {
-    alert("Error loading dropdown data");
-    console.error(err);
+// 🔹 Load Sewadar
+function loadSewadar(){
+  const sewadarSelect = document.getElementById("sewadar");
+  sewadarSelect.innerHTML = "<option value=''>Select Sewadar</option>";
+  if(!DATA[district.value][tehsil.value]) return;
+  DATA[district.value][tehsil.value].forEach(s=>{
+    sewadarSelect.innerHTML += `<option value="${s}">${s}</option>`;
   });
+}
 
-// Submit handler
-document.getElementById("submitBtn").addEventListener("click", ()=>{
-  const name = document.getElementById("name").value.trim();
-  const state = stateSelect.value;
-  const district = districtSelect.value;
+// 🔹 Submit to Google Sheet
+function submitToSheet(){
+  const name = document.getElementById("name").value;
+  const district = document.getElementById("district").value;
+  const tehsil = document.getElementById("tehsil").value;
+  const sewadar = document.getElementById("sewadar").value;
+  const sewa = document.getElementById("sewa").value;
 
-  if(!name || !state || !district){
-    alert("Please fill all fields");
+  if(!name || !district || !tehsil || !sewadar){
+    alert("❌ सभी फ़ील्ड भरें");
     return;
   }
 
-  const postData = {
-    data:[{
-      Name: name,
-      state: state,
-      district: district
-    }]
-  };
+  const data = { name, district, tehsil, sewadar, sewa, time: new Date().toLocaleString() };
 
-  fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify(postData)
-  })
-  .then(res => res.json())
-  .then(resp => {
-    alert("Data Saved Successfully!");
-    document.getElementById("name").value = "";
-    stateSelect.value = "";
-    districtSelect.innerHTML = "<option value=''>Select District</option>";
-  })
-  .catch(err => {
-    alert("Error submitting data");
-    console.error(err);
+  document.getElementById("msg").innerText = "Sending...";
+
+  // 🔹 Your deployed Apps Script Web App URL
+  fetch("https://script.google.com/macros/s/AKfycbxFEo-3G1Rug0WW5zXbmOjMhXFfRskrAiuYOJ2cluLiZ0HXF3WkilL1uicOhg6U49Wq/exec", {
+    method: "POST",
+    mode: "no-cors", // SPCK/mobile friendly
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
   });
 
-});
+  document.getElementById("msg").innerText = `✅ Submit ho gaya: ${name}, ${district}, ${tehsil}, ${sewadar}, Sewa=${sewa}`;
+}
 </script>
 
 </body>
