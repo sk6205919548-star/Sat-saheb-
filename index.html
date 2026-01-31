@@ -37,25 +37,15 @@ Submit
 
 <p id="msg"></p>
 
-<!-- ================= SCRIPT START ================= -->
 <script>
 let DATA = {};
-const CACHE_KEY = "DISTRICT_DATA_CACHE";
 
-// 🔹 Load from Cache First (Instant)
-const cached = localStorage.getItem(CACHE_KEY);
-if(cached){
-  DATA = JSON.parse(cached);
-  loadDistricts();   // ⚡ instant load
-}
-
-// 🔹 Fetch Fresh Data (Background Update)
-fetch("https://script.google.com/macros/s/AKfycby50_BxdQ0y4fevWc0nmN0nQvfPMRmMheLgF0RJoR-NddCuYydAnQ72iNHuwj3hHLXW/exec")
+// ⚡ Ultra Fast Static JSON Load
+fetch("./data.json")
 .then(res => res.json())
 .then(json => {
   DATA = json;
-  localStorage.setItem(CACHE_KEY, JSON.stringify(json)); // cache save
-  loadDistricts(); // refresh with latest data
+  loadDistricts();
 });
 
 // 🔹 Load Districts
@@ -100,27 +90,14 @@ function loadSewadar(){
 
 // 🔹 Submit to Google Sheet
 function submitToSheet(){
-  const name = document.getElementById("name").value;
-  const district = document.getElementById("district").value;
-  const tehsil = document.getElementById("tehsil").value;
-  const sewadar = document.getElementById("sewadar").value;
-  const sewa = document.getElementById("sewa").value;
-
-  if(!name || !district || !tehsil || !sewadar){
-    alert("❌ सभी फ़ील्ड भरें");
-    return;
-  }
-
   const data = { 
-    name, 
-    district, 
-    tehsil, 
-    sewadar, 
-    sewa, 
-    time: new Date().toLocaleString() 
+    name: name.value,
+    district: district.value,
+    tehsil: tehsil.value,
+    sewadar: sewadar.value,
+    sewa: sewa.value,
+    time: new Date().toLocaleString()
   };
-
-  document.getElementById("msg").innerText = "Sending...";
 
   fetch("https://script.google.com/macros/s/AKfycbxFEo-3G1Rug0WW5zXbmOjMhXFfRskrAiuYOJ2cluLiZ0HXF3WkilL1uicOhg6U49Wq/exec", {
     method: "POST",
@@ -129,10 +106,9 @@ function submitToSheet(){
     body: JSON.stringify(data)
   });
 
-  document.getElementById("msg").innerText = `✅ Data Google Sheet me save ho gaya`;
+  document.getElementById("msg").innerText = "✅ Data Google Sheet me save ho gaya";
 }
 </script>
-<!-- ================= SCRIPT END ================= -->
 
 </body>
 </html>
