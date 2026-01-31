@@ -37,15 +37,25 @@ Submit
 
 <p id="msg"></p>
 
+<!-- ================= SCRIPT START ================= -->
 <script>
 let DATA = {};
+const CACHE_KEY = "DISTRICT_DATA_CACHE";
 
-// 🔹 Load dropdown data from Google Sheet API
+// 🔹 Load from Cache First (Instant)
+const cached = localStorage.getItem(CACHE_KEY);
+if(cached){
+  DATA = JSON.parse(cached);
+  loadDistricts();   // ⚡ instant load
+}
+
+// 🔹 Fetch Fresh Data (Background Update)
 fetch("https://script.google.com/macros/s/AKfycby50_BxdQ0y4fevWc0nmN0nQvfPMRmMheLgF0RJoR-NddCuYydAnQ72iNHuwj3hHLXW/exec")
 .then(res => res.json())
 .then(json => {
   DATA = json;
-  loadDistricts();
+  localStorage.setItem(CACHE_KEY, JSON.stringify(json)); // cache save
+  loadDistricts(); // refresh with latest data
 });
 
 // 🔹 Load Districts
@@ -122,6 +132,7 @@ function submitToSheet(){
   document.getElementById("msg").innerText = `✅ Data Google Sheet me save ho gaya`;
 }
 </script>
+<!-- ================= SCRIPT END ================= -->
 
 </body>
 </html>
